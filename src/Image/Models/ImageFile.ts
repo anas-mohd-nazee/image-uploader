@@ -1,14 +1,7 @@
 import mongoose, {Schema} from 'mongoose';
+import { FileDto } from './FileDto';
 
-export interface IImageFile {
-    fileName: string;
-    fileBlob: {
-        data: Buffer,
-        mimeType: string
-    }
-}
-
-export interface IImageFileDoc extends IImageFile, mongoose.Document { }
+export interface IImageFileDoc extends FileDto, mongoose.Document { }
 
 export const ImageSchema = new Schema({
     _id: Schema.Types.ObjectId,

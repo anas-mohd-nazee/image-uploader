@@ -3,10 +3,11 @@ import { Exception } from "../../common/Exception/Exception";
 import { OperationResult } from "../../common/Model/OperationResult";
 import { OperationResultEnums } from "../../common/Model/OperationResultEnums";
 import { ServerPath } from "../../common/Provider/ServerPathProvider";
-import ImageFileUpload, { IImageFile } from "../../Image/Models/ImageFile";
+import ImageFileUpload from "../../Image/Models/ImageFile";
+import { FileDto } from "../Models/FileDto";
 
 export default class ImageRepository {
-  public async addImage(imageFile: IImageFile): Promise<OperationResult> {
+  public async addImage(imageFile: FileDto): Promise<OperationResult> {
     const imageUpload = new ImageFileUpload({
       _id: new Types.ObjectId(),
       fileName: imageFile.fileName,

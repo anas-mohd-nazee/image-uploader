@@ -6,5 +6,4 @@ This project provides a simple service of uploading images to a server with Mong
 
 ### References
 
-[1] <https://github.com/s1njar/express-ioc-ts-boilerplate>
-[2] <https://bezkoder.com/node-js-upload-store-images-mongodb/>
+1.<https://github.com/s1njar/express-ioc-ts-boilerplate> 2.<https://bezkoder.com/node-js-upload-store-images-mongodb/>

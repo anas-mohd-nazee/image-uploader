@@ -26,11 +26,6 @@ export class Controller implements IController {
         promise
             .then((result) => {
                 this.setResponseForType(response, result);
-                // response.status(StatusCodes.OK).json({
-                //   status: 200,
-                //   message: "ok",
-                //   data: result.getdata(),
-                // });
             })
             .catch((error) => {
                 if (application.debugMode) {
@@ -52,18 +47,26 @@ export class Controller implements IController {
     }
 
     private setResponseForType(response: Response, result: IResultResponse): void {
+        const statusCode = this.getDefaultOrAssignedStatusCode(result);
         if (result.getContentType() == null) {
-            response.status(StatusCodes.OK).json({
-              status: 200,
-              message: "ok",
+            response.status(statusCode).json({
+              status: statusCode,
+              message: StatusCodes[statusCode],
               data: result.getdata(),
             });
             return;
         }
 
-        response.status(StatusCodes.OK);
+        response.status(statusCode);
         response.contentType(result.getContentType());
         response.send(result.getdata());
     }
 
+    private getDefaultOrAssignedStatusCode(result: IResultResponse): StatusCodes {
+        if (result.getStatus() == null) {
+            return StatusCodes.OK;
+        }
+
+        return result.getStatus();
+    }
 }
