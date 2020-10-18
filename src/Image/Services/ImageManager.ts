@@ -12,24 +12,28 @@ import ArchiveHelperService from "./ArchiveHelperService";
 import { FileDto } from "../Models/FileDto";
 import { ResultResponse } from "../../common/Model/ResultResponse";
 import { StatusCodes } from "http-status-codes";
+import { ImageDimension } from "../Models/ImageDimension";
 
 export class ImageManager {
-  private readonly imageTypeWrapperService: ImagePropertyProvider;
+  private readonly imagePropertyProvider: ImagePropertyProvider;
   private readonly imageRepository: ImageRepository;
   private readonly archiveHelperService: ArchiveHelperService;
+  private readonly minWidthForThumbnail = 128;
+  private readonly minHeightForThumbnail = 128;
+
 
   constructor(
     @Inject imageRepository: ImageRepository,
-    @Inject imageTypeWrapperService: ImagePropertyProvider,
+    @Inject imagePropertyProvider: ImagePropertyProvider,
     @Inject archiveHelperService: ArchiveHelperService
   ) {
     this.imageRepository = imageRepository;
-    this.imageTypeWrapperService = imageTypeWrapperService;
+    this.imagePropertyProvider = imagePropertyProvider;
     this.archiveHelperService = archiveHelperService;
   }
 
   public async addImage(imageFile: FileDto): Promise<OperationResult> {
-    const mimeType = this.imageTypeWrapperService.getImageType(imageFile.fileBlob.data);
+    const mimeType = this.imagePropertyProvider.getImageType(imageFile.fileBlob.data);
     if (mimeType == null) {
       return new OperationResult(
         imageFile.fileName,
@@ -40,7 +44,25 @@ export class ImageManager {
 
     imageFile.fileBlob.mimeType = mimeType;
 
-    return this.imageRepository.addImage(imageFile);
+    const imageDimension = await this.imagePropertyProvider.getImageDimension(imageFile.fileBlob.data);
+
+    if (!(this.canGenerateThumbnails(imageDimension))) {
+      return this.imageRepository.addImage(imageFile);
+    }
+
+    const thumbnails = await this.imagePropertyProvider.getAllImageThumbnails(imageFile, imageDimension);
+
+    const addImagePromises = thumbnails.map(thumbImage => this.imageRepository.addImage(thumbImage));
+    addImagePromises.push(this.imageRepository.addImage(imageFile));
+
+    const multipleResults: any[] = [];
+    await Promise.all(addImagePromises).then((results) => {
+      multipleResults.push(...results);
+    });
+
+    console.log(multipleResults);
+
+    return new OperationResult(imageFile.fileName, OperationResultEnums.Success, multipleResults);
   }
 
   public async addImagesFromArchive(archiveFile: FileArchiveDto): Promise<IResultResponse> {
@@ -85,5 +107,9 @@ export class ImageManager {
     });
 
     return responsePayloads;
+  }
+
+  private canGenerateThumbnails(imageDimension: ImageDimension): boolean {
+    return imageDimension.width >= this.minWidthForThumbnail && imageDimension.height >= this.minHeightForThumbnail;
   }
 }

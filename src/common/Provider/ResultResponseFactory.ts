@@ -13,7 +13,7 @@ export class ResultResponseFactory {
             case (OperationResultEnums.Failed):
                 return new ResultResponse().setStatus(StatusCodes.BAD_REQUEST).setMessage(operationResult.payload);
             case (OperationResultEnums.Success):
-                return new ResultResponse().setStatus(StatusCodes.OK).setData({ imagePath: operationResult.payload });
+                return new ResultResponse().setStatus(StatusCodes.OK).setData(operationResult.payload);
             default:
                 throw new Exception(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to convert operation result");
         }
