@@ -1,0 +1,9 @@
+{
+  "spec_dir": "./src/*Testing",
+  "spec_files": [
+    "**/*.test.ts"
+  ],
+  "helpers": [
+    "jasmine/*.ts"
+  ]
+}
